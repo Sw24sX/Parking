@@ -10,17 +10,17 @@ import java.util.List;
 @Table(name = "CAR")
 public class Car extends BaseEntity {
     @Column(name = "NUMBER")
-    private String name;
+    private String number;
 
     @OneToMany(mappedBy = "car")
     private List<Booking> bookings;
 
-    public String getName() {
-        return name;
+    public String getNumber() {
+        return number;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setNumber(String name) {
+        this.number = name;
     }
 
     public List<Booking> getBookings() {

@@ -1,8 +1,6 @@
 package com.example.parking.service;
 
 import com.example.parking.dto.BookingDto;
-import com.example.parking.dto.request.ChangeDto;
-import com.example.parking.dto.request.ReadDto;
 import com.example.parking.mapper.BookingMapper;
 import com.example.parking.mapper.CarMapper;
 import com.example.parking.mapper.ParkingMapper;
@@ -11,8 +9,9 @@ import com.example.parking.model.Car;
 import com.example.parking.model.Parking;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -34,40 +33,67 @@ public class CommonService {
         this.bookingMapper = bookingMapper;
     }
 
-    public ReadDto getAll() {
-        ReadDto result = new ReadDto();
-        result.setCars(carMapper.toListCarDto(carService.getAll()));
-        result.setParkings(parkingMapper.toListParkingDto(parkingService.getAll()));
-        result.setBookings(bookingMapper.toListBookingDto(bookingService.getAll()));
-
-        return result;
+    public List<BookingDto> getAll() {
+        return bookingMapper.toListBookingDto(bookingService.getAll());
     }
 
-    public ChangeDto create(ChangeDto dto) throws Exception {
-        ChangeDto result = new ChangeDto();
-
-        Car car = carService.create(carMapper.toCar(dto.getCar()));
-        result.setCar(carMapper.toCarDto(car));
-
-        Parking parking = parkingService.create(parkingMapper.toParking(dto.getParking()));
-        result.setParking(parkingMapper.toParkingDto(parking));
-
-        if (dto.getBooking() != null) {
-            Booking booking = bookingMapper.toBooking(dto.getBooking());
-            Long carId = Optional.ofNullable(dto.getBooking().getCar()).orElseThrow(EntityNotFoundException::new).getId();
-            Long parkingId = Optional.ofNullable(dto.getBooking().getParking()).orElseThrow(EntityNotFoundException::new).getId();
-
-            if (bookingService.existBookingAtPeriodDate(carId, parkingId, dto.getBooking().getFromDate(), dto.getBooking().getToDate())) {
-                //TODO: throw custom exception
-                throw new Exception();
-            }
-
-            Car bookingCar = carService.getById(carId);
-            Parking bookingParking = parkingService.getById(parkingId);
-            BookingDto bookingDto = bookingMapper.toBookingDto(bookingService.create(booking, car, parking));
-            result.setBooking(bookingDto);
+    public BookingDto create(BookingDto dto) throws Exception {
+        if (dto == null) {
+            //TODO: throw custom exception
+            throw new Exception();
         }
 
-        return result;
+        checkBooking(dto, dto.getId());
+        Booking booking = bookingMapper.toBooking(dto);
+        fillBooking(booking, dto);
+        return bookingMapper.toBookingDto(bookingService.create(booking));
+    }
+
+    private void checkBooking(BookingDto dto, Long id) throws Exception {
+        List<Booking> bookingsByCar = bookingService.existCarAtPeriodDate(dto.getCar().getId(), dto.getFromDate(), dto.getToDate());
+        if (!bookingsByCar.isEmpty() && (bookingsByCar.size() > 1 || !bookingsByCar.get(0).getId().equals(id))) {
+            //TODO: throw custom exception
+            throw new Exception();
+        }
+
+        List<Booking> bookingsByParking = bookingService.existPeriodAtPeriodDate(dto.getParking().getId(), dto.getFromDate(), dto.getToDate());
+        if (!bookingsByParking.isEmpty() && (bookingsByParking.size() > 1 || !bookingsByParking.get(0).getId().equals(id))) {
+            //TODO: throw custom exception
+            throw new Exception();
+        }
+    }
+
+    private void fillBooking(Booking booking, BookingDto dto) {
+        Car car = dto.getCar().getId() == null ? carMapper.toCar(dto.getCar()) :
+                carService.getById(dto.getCar().getId());
+        Parking parking = dto.getParking().getId() == null ? parkingMapper.toParking(dto.getParking()) :
+                parkingService.getById(dto.getParking().getId());
+
+        car.getBookings().add(booking);
+        parking.getBookings().add(booking);
+
+        booking.setCar(car);
+        booking.setParking(parking);
+    }
+
+    public BookingDto update(BookingDto dto, Long id) throws Exception {
+        if (dto == null) {
+            //TODO: throw custom exception
+            throw new Exception();
+        }
+
+        Booking booking = bookingService.getById(id);
+        checkBooking(dto, id);
+        bookingMapper.updateBookingFromDto(dto, booking);
+        fillBooking(booking, dto);
+
+        carMapper.updateCarFromDto(dto.getCar(), booking.getCar());
+        parkingMapper.updateParkingFromDto(dto.getParking(), booking.getParking());
+
+        return bookingMapper.toBookingDto(bookingService.create(booking));
+    }
+
+    public void delete(Long id) {
+        bookingService.delete(id);
     }
 }

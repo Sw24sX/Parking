@@ -1,9 +1,7 @@
 package com.example.parking.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -13,7 +11,7 @@ public class Parking extends BaseEntity {
     private String name;
 
     @OneToMany(mappedBy = "parking")
-    private List<Booking> bookings;
+    private List<Booking> bookings = new ArrayList<>();
 
     public String getName() {
         return name;

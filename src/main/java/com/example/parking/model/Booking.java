@@ -12,13 +12,16 @@ public class Booking extends BaseEntity {
     @Column(name = "TO_DATE")
     private Date toDate;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "PARKING_ID")
     private Parking parking;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "CAR_ID")
     private Car car;
+
+    @Column(name = "PRICE")
+    private int price;
 
     public Date getFromDate() {
         return fromDate;
@@ -50,5 +53,13 @@ public class Booking extends BaseEntity {
 
     public void setCar(Car car) {
         this.car = car;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
     }
 }

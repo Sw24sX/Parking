@@ -41,4 +41,8 @@ public class ParkingService {
         //TODO check exist
         parkingRepository.deleteById(id);
     }
+
+    public boolean existById(Long id) {
+        return parkingRepository.existsById(id);
+    }
 }

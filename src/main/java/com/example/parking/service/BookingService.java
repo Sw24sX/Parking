@@ -27,9 +27,7 @@ public class BookingService {
         return bookingRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     }
 
-    public Booking create(Booking booking, Car car, Parking parking) {
-        booking.setCar(car);
-        booking.setParking(parking);
+    public Booking create(Booking booking) {
         return bookingRepository.save(booking);
     }
 
@@ -48,8 +46,15 @@ public class BookingService {
         bookingRepository.deleteById(bookingId);
     }
 
-    public boolean existBookingAtPeriodDate(Long carId, Long parkingId, Date fromDate, Date toDate) {
-        return bookingRepository.existsCarInBorderDate(carId, fromDate, toDate) ||
-                bookingRepository.existsParkingInBorderDate(parkingId, fromDate, toDate);
+    public List<Booking> existCarAtPeriodDate(Long carId, Date fromDate, Date toDate) {
+        return bookingRepository.findBookingInBorderDateByCarId(carId, fromDate, toDate);
+    }
+
+    public List<Booking> existPeriodAtPeriodDate(Long parkingId, Date fromDate, Date toDate) {
+        return bookingRepository.findBookingInBorderDateByParkingId(parkingId, fromDate, toDate);
+    }
+
+    public boolean existById(Long id) {
+        return bookingRepository.existsById(id);
     }
 }

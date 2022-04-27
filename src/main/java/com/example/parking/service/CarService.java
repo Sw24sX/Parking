@@ -42,8 +42,12 @@ public class CarService {
         return carRepository.save(car);
     }
 
-    public void delete(long id) {
+    public void delete(Long id) {
         //todo check by id
         carRepository.deleteById(id);
+    }
+
+    public boolean existById(Long id) {
+        return carRepository.existsById(id);
     }
 }

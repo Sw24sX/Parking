@@ -6,17 +6,13 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-import java.util.List;
-
 @Mapper(componentModel = "spring")
 public interface ParkingMapper {
     ParkingDto toParkingDto(Parking parking);
-    List<ParkingDto> toListParkingDto(List<Parking> parkings);
-
-    Parking toParking(ParkingDto parkingDto);
-    List<Parking> toListParking(List<ParkingDto> parkingDtos);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "bookings", ignore = true)
+    Parking toParking(ParkingDto parkingDto);
+
+    @Mapping(target = "id", ignore = true)
     void updateParkingFromDto(ParkingDto parkingDto, @MappingTarget Parking parking);
 }

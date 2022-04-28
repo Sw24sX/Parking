@@ -1,5 +1,7 @@
 package com.example.parking.model;
 
+import com.sun.istack.NotNull;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
@@ -10,9 +12,11 @@ import java.util.List;
 @Entity
 @Table(name = "CAR")
 public class Car extends BaseEntity {
+    @NotNull
     @Column(name = "NUMBER")
     private String number;
 
+    @NotNull
     @OneToMany(mappedBy = "car")
     private List<Booking> bookings = new ArrayList<>();
 

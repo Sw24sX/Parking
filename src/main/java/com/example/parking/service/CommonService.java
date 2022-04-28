@@ -34,7 +34,8 @@ public class CommonService {
     }
 
     public BookingDto create(BookingDto dto) {
-        Booking booking = bookingMapper.toBooking(dto);
+        Booking booking = new Booking();
+        bookingMapper.updateBookingFromDto(dto, booking);
         fillBooking(booking, dto);
         bookingService.validateBooking(booking, booking.getId());
         return bookingMapper.toBookingDto(bookingService.save(booking));

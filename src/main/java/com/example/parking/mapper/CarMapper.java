@@ -6,17 +6,13 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-import java.util.List;
-
 @Mapper(componentModel = "spring")
 public interface CarMapper {
     CarDto toCarDto(Car car);
-    List<CarDto> toListCarDto(List<Car> cars);
-
-    Car toCar(CarDto carDto);
-    List<Car> toListCar(List<CarDto> carDtos);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "bookings", ignore = true)
+    Car toCar(CarDto carDto);
+
+    @Mapping(target = "id", ignore = true)
     void updateCarFromDto(CarDto dto, @MappingTarget Car car);
 }

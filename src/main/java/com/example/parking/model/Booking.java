@@ -1,25 +1,32 @@
 package com.example.parking.model;
 
+import com.sun.istack.NotNull;
+
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
 @Table(name = "BOOKING")
 public class Booking extends BaseEntity {
+    @NotNull
     @Column(name = "FROM_DATE")
     private Date fromDate;
 
+    @NotNull
     @Column(name = "TO_DATE")
     private Date toDate;
 
+    @NotNull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "PARKING_ID")
     private Parking parking;
 
+    @NotNull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "CAR_ID")
     private Car car;
 
+    @NotNull
     @Column(name = "PRICE")
     private int price;
 

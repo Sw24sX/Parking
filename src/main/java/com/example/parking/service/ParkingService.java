@@ -1,11 +1,12 @@
 package com.example.parking.service;
 
+import com.example.parking.exceptions.EntityNotFoundException;
+import com.example.parking.exceptions.EntityNotValidException;
+import com.example.parking.exceptions.Messages;
 import com.example.parking.model.Parking;
 import com.example.parking.repository.ParkingRepository;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
 @Service
@@ -16,33 +17,18 @@ public class ParkingService {
         this.parkingRepository = parkingRepository;
     }
 
-    public List<Parking> getAll() {
-        return parkingRepository.findAll();
-    }
-
     public Parking getById(Long id) {
-        return parkingRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-    }
-
-    public Parking create(Parking parking) {
-        return parkingRepository.save(parking);
-    }
-
-    public Parking update(Parking parking, Long id) {
-        if (!parkingRepository.existsById(id)) {
-            throw new EntityExistsException();
-        }
-
-        parking.setId(id);
-        return parkingRepository.save(parking);
+        return parkingRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(id));
     }
 
     public void delete(Long id) {
-        //TODO check exist
         parkingRepository.deleteById(id);
     }
 
-    public boolean existById(Long id) {
-        return parkingRepository.existsById(id);
+    public void validate(Parking parking) {
+        List<Parking> parkings = parkingRepository.findAllByName(parking.getName());
+        if (!parkings.isEmpty() && (parkings.size() > 1 || !parkings.get(0).getId().equals(parking.getId()))) {
+            throw new EntityNotValidException(Messages.PARKING_EXISTED, parking.getName());
+        }
     }
 }

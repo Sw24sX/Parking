@@ -19,4 +19,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             ":fromDate <= b.toDate and b.toDate <= :toDate or " +
             "b.fromDate <= :fromDate and :toDate <= b.toDate)")
     List<Booking> findBookingInBorderDateByParkingId(Long parkingId, Date fromDate, Date toDate);
+
+    boolean existsByCar_Id(Long carId);
+
+    boolean existsByParking_Id(Long parkingId);
 }

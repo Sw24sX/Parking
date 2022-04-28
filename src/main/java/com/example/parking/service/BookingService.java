@@ -1,14 +1,12 @@
 package com.example.parking.service;
 
+import com.example.parking.exceptions.EntityNotFoundException;
+import com.example.parking.exceptions.EntityNotValidException;
+import com.example.parking.exceptions.Messages;
 import com.example.parking.model.Booking;
-import com.example.parking.model.Car;
-import com.example.parking.model.Parking;
 import com.example.parking.repository.BookingRepository;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityNotFoundException;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -24,21 +22,10 @@ public class BookingService {
     }
 
     public Booking getById(Long id) {
-        return bookingRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        return bookingRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(id));
     }
 
-    public Booking create(Booking booking) {
-        return bookingRepository.save(booking);
-    }
-
-    public Booking update(Booking booking, Long bookingId, Car car, Parking parking) {
-        if (!bookingRepository.existsById(bookingId)) {
-            throw new EntityExistsException();
-        }
-
-        booking.setId(bookingId);
-        booking.setCar(car);
-        booking.setParking(parking);
+    public Booking save(Booking booking) {
         return bookingRepository.save(booking);
     }
 
@@ -46,15 +33,29 @@ public class BookingService {
         bookingRepository.deleteById(bookingId);
     }
 
-    public List<Booking> existCarAtPeriodDate(Long carId, Date fromDate, Date toDate) {
-        return bookingRepository.findBookingInBorderDateByCarId(carId, fromDate, toDate);
+    public void validateBooking(Booking booking, Long bookingId) {
+        if (booking.getFromDate().after(booking.getToDate())) {
+            throw new EntityNotValidException(Messages.INCORRECT_BOOKING_PERIOD);
+        }
+
+        List<Booking> bookingsByCar = bookingRepository.findBookingInBorderDateByCarId(booking.getCar().getId(),
+                booking.getFromDate(), booking.getToDate());
+        if (!bookingsByCar.isEmpty() && (bookingsByCar.size() > 1 || !bookingsByCar.get(0).getId().equals(bookingId))) {
+            throw new EntityNotValidException(Messages.BOOKING_PERIOD_INTERSECTS_WITH_EXISTS);
+        }
+
+        List<Booking> bookingsByParking = bookingRepository.findBookingInBorderDateByParkingId(booking.getParking().getId(),
+                booking.getFromDate(), booking.getToDate());
+        if (!bookingsByParking.isEmpty() && (bookingsByParking.size() > 1 || !bookingsByParking.get(0).getId().equals(bookingId))) {
+            throw new EntityNotValidException(Messages.BOOKING_PERIOD_INTERSECTS_WITH_EXISTS);
+        }
     }
 
-    public List<Booking> existPeriodAtPeriodDate(Long parkingId, Date fromDate, Date toDate) {
-        return bookingRepository.findBookingInBorderDateByParkingId(parkingId, fromDate, toDate);
+    public boolean existByCarId(Long carId) {
+        return bookingRepository.existsByCar_Id(carId);
     }
 
-    public boolean existById(Long id) {
-        return bookingRepository.existsById(id);
+    public boolean existByParkingId(Long parkingId) {
+        return bookingRepository.existsByParking_Id(parkingId);
     }
 }

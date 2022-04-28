@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("booking/")
+@RequestMapping("booking")
 public class BookingController {
     private final CommonService commonService;
 
@@ -21,12 +21,12 @@ public class BookingController {
     }
 
     @PostMapping
-    public BookingDto create(@RequestBody BookingDto dto) throws Exception {
+    public BookingDto create(@RequestBody BookingDto dto) {
         return commonService.create(dto);
     }
 
     @PutMapping("{id}")
-    public BookingDto update(@PathVariable(name = "id") Long id, @RequestBody BookingDto dto) throws Exception {
+    public BookingDto update(@PathVariable(name = "id") Long id, @RequestBody BookingDto dto) {
         return commonService.update(dto, id);
     }
 
